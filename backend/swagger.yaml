@@ -1,0 +1,258 @@
+swagger: '2.0'
+info:
+  version: '1.0'
+  title: Fake Look Project
+  contact: {}
+host: localhost:5000
+basePath: /api/v1
+securityDefinitions: {}
+schemes:
+- http
+consumes:
+- application/json
+produces:
+- application/json
+paths:
+  /questions:
+      get:
+        summary: get all questions
+        tags:
+        - Question
+        operationId: getallquestions
+        deprecated: false
+        produces:
+        - application/json
+        parameters: []
+        description: 'Showing all items of questions'
+        responses:
+          '200':
+            description: 'And in addition comes an array with all the choices that belong to the same question'
+      post:
+        summary: create a new choice
+        tags:
+        - Question
+        operationId: createnewquestion
+        deprecated: false
+        produces:
+        - application/json
+        parameters:
+        - name: Body
+          in: body
+          required: true
+          description: ''
+          schema:
+            $ref: '#/definitions/createnewquestion'
+        responses:
+          '200':
+            description: ''
+            headers: {}
+  /questions/{id}:
+      parameters:
+        - in: path
+          name: id
+          type: string
+          required: true
+          description: get single question
+      get:
+        summary: get single question
+        tags:
+        - Question
+        operationId: getsinglequestion
+        deprecated: false
+        produces:
+        - application/json
+        parameters: []
+        description: ''
+        responses:
+          '200':
+            description: 'returns single question object'
+            headers: {}
+      delete:
+        summary: delete question by id
+        tags:
+        - Question
+        operationId: deletechoice
+        deprecated: false
+        produces:
+        - application/json
+        parameters: []
+        description: ''
+        responses:
+          '200':
+            description: 'success message'
+            headers: {}
+  /choices:
+    get:
+      summary: get all choices
+      tags:
+      - Choice
+      operationId: getallchoices
+      deprecated: false
+      produces:
+      - application/json
+      parameters: []
+      description: 'Showing all the items of choice'
+      responses:
+        '200':
+          description: 'return array of all choices'
+    post:
+      summary: create a new choice
+      tags:
+      - Choice
+      operationId: createnewchoice
+      deprecated: false
+      produces:
+      - application/json
+      parameters:
+      - name: Body
+        in: body
+        required: true
+        description: 'questionId with contentText'
+        schema:
+          $ref: '#/definitions/createnewchoice'
+      responses:
+        '200':
+          description: 'return choice object'
+          headers: {}
+  /choices/{id}:
+    parameters:
+      - in: path
+        name: id
+        type: string
+        required: true
+        description: get single choice
+    get:
+      summary: get single choice
+      tags:
+      - Choice
+      operationId: getsinglechoice
+      deprecated: false
+      produces:
+      - application/json
+      parameters: []
+      description: ''
+      responses:
+        '200':
+          description: 'return single choice object'
+          headers: {}
+    delete:
+      summary: delete choice by id
+      tags:
+      - Choice
+      operationId: deletechoice
+      deprecated: false
+      produces:
+      - application/json
+      parameters: []
+      description: ''
+      responses:
+        '200':
+          description: 'success message'
+          headers: {}
+  /votes:
+    get:
+      summary: get all votes
+      tags:
+      - Votes
+      operationId: getallvotes
+      deprecated: false
+      produces:
+      - application/json
+      parameters: []
+      description: 'Showing all the items of vote'
+      responses:
+        '200':
+          description: 'return array of all votes'
+    post:
+      summary: create a new vote
+      tags:
+      - Votes
+      operationId: createnewvote
+      deprecated: false
+      produces:
+      - application/json
+      parameters:
+      - name: Body
+        in: body
+        required: true
+        description: 'choiceId'
+        schema:
+          $ref: '#/definitions/createnewvote'
+      responses:
+        '200':
+          description: 'return vote object'
+          headers: {}
+  /votes/{id}:
+    parameters:
+      - in: path
+        name: id
+        type: string
+        required: true
+        description: get single vote
+    get:
+      summary: get single vote
+      tags:
+      - Votes
+      operationId: getsinglevote
+      deprecated: false
+      produces:
+      - application/json
+      parameters: []
+      description: ''
+      responses:
+        '200':
+          description: 'return single vote object'
+          headers: {}
+    delete:
+      summary: delete vote by id
+      tags:
+      - Votes
+      operationId: deletevote
+      deprecated: false
+      produces:
+      - application/json
+      parameters: []
+      description: ''
+      responses:
+        '200':
+          description: 'success message'
+          headers: {}
+definitions:
+  createnewchoice:
+    title: createnewchoice
+    example:
+      questionId: 63c4004cc854b083db6d5794
+      contentText: some content text
+    type: object
+    properties:
+      questionId:
+        type: string
+      contentText:
+        type: string
+    required:
+    - questionId
+    - contentText
+  createnewquestion:
+    title: createnewquestion
+    example:
+      contentText: some question content text
+    type: object
+    properties:
+      contentText:
+        type: string
+    required:
+    - contentText
+  createnewvote:
+    title: createnewquestion
+    example:
+      choiceId: 63c3f8ca029b581ad0f98fdc
+    type: object
+    properties:
+      contentText:
+        type: string
+    required:
+    - choiceId
+tags:
+- name: Question
+- name: Choice
+- name: Votes
