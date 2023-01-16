@@ -26,12 +26,11 @@ const QuestionSchema = new mongoose.Schema(
 
 //set virtual field named "choices" to able to get info from other document
 QuestionSchema.virtual('choices', {
-  ref: 'Choice',          //name of other schema 
-  localField: '_id',      //specific fields of connection
-  foreignField: 'questionId', //where the connection found in the schema 
-  justOne: false,         //allow multiple addresses
+  ref: 'Choice',        
+  localField: '_id',      
+  foreignField: 'questionId', 
+  justOne: false,        
 });
-
 
 QuestionSchema.post('remove', async function () {
   await this.model('Choice').deleteMany({ question: this._id });

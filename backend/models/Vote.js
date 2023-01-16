@@ -15,9 +15,9 @@ const VoteSchema = new mongoose.Schema({
 );
 VoteSchema.index({ userIp: "text", choiceId: 1 }, { unique: true });
 
-VoteSchema.statics.calculateRating = async function (choiceId) {
+VoteSchema.statics.calculateRating = async function (id) {
     const result = await this.aggregate([
-        { $match: { choiceId: choiceId } },
+        { $match: { choiceId: id } },
         {
             $group: {
                 _id: null,
@@ -28,7 +28,7 @@ VoteSchema.statics.calculateRating = async function (choiceId) {
 
     try {
         await this.model('Choice').findOneAndUpdate(
-            { _id: choiceId },
+            { _id: id },
             {
                 numOfVotes: result[0]?.numOfVotes || 0,
             }
@@ -37,6 +37,7 @@ VoteSchema.statics.calculateRating = async function (choiceId) {
         console.log(error);
     }
 };
+
 VoteSchema.post('save', async function () {
     await this.constructor.calculateRating(this.choiceId);
 });

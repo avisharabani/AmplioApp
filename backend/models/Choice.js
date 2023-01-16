@@ -20,6 +20,7 @@ const ChoiceSchema = mongoose.Schema(
     },
     { timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } }
 );
+ChoiceSchema.index({ questionId: 1, contentText: "text" }, { unique: true });
 
 ChoiceSchema.virtual('votes', {
     ref: 'Vote',
@@ -28,11 +29,9 @@ ChoiceSchema.virtual('votes', {
     justOne: false,
 });
 
-ChoiceSchema.index({ questionId: 1, contentText: "text" }, { unique: true });
-
-ChoiceSchema.statics.calculateChoices = async function (questionId) {
+ChoiceSchema.statics.calculateChoices = async function (id) {
     const result = await this.aggregate([
-        { $match: { questionId: questionId } },
+        { $match: { questionId: id } },
         {
             $group: {
                 _id: null,
@@ -43,7 +42,7 @@ ChoiceSchema.statics.calculateChoices = async function (questionId) {
 
     try {
         await this.model('Question').findOneAndUpdate(
-            { _id: questionId },
+            { _id: id },
             {
                 numOfChoice: result[0]?.numOfChoice || 0,
             }

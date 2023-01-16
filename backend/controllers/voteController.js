@@ -1,4 +1,5 @@
 const Vote = require('../models/Vote')
+const Choice = require('../models/Choice')
 const { StatusCodes } = require('http-status-codes')
 const CustomErrors = require('../errors')
 
@@ -42,16 +43,56 @@ const getSingleVote = async (req, res) => {
  * @response vote object
  */
 const createVote = async (req, res) => {
-    const { choiceId } = req.body;
+    let { userIp, choiceId } = req.body;
 
     if (!choiceId) {
         throw new CustomErrors.BadRequestError('please provide userIp and choiceId');
     }
-    req.body.userIp = req.ip
+    if (!userIp) {
+        userIp = req.ip;
+        req.body.userIp = userIp;
+    }
+
+    const currentChoice = await Choice.findOne({ choiceId: choiceId });
+    const oldVote = await Choice.aggregate(
+        [{
+            $match: {
+                questionId: require('mongoose').Types.ObjectId(String(currentChoice.questionId))
+            }
+        }, {
+            $lookup: {
+                from: 'votes',
+                localField: '_id',
+                foreignField: 'choiceId',
+                pipeline: [
+                    { $match: { userIp: userIp } }
+                ],
+                as: 'oldVotes'
+            }
+        }, {
+            $unwind: {
+                path: '$oldVotes',
+                preserveNullAndEmptyArrays: false
+            }
+        }, {
+            $project: {
+                contact: 1,
+                oldVotes: 1
+            }
+        }]
+    );
+
+    console.log(oldVote.length)
+
+    //if there is another choice by current user ip
+    if (oldVote.length > 0) {
+        const vote = await Vote.findOne({ _id: oldVote[0].oldVotes._id });
+        await vote.remove();
+    }
+
     const vote = await Vote.create(req.body);
 
     res.status(StatusCodes.CREATED).json({ vote });
-
 };
 
 /**

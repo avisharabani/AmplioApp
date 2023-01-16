@@ -8,7 +8,7 @@ const CustomErrors = require('../errors')
  * @response array of questions 
  */
 const getAllQuestions = async (req, res) => {
-    const questions = await Question.find({})
+    const questions = await Question.find({}).populate('choices')
 
     if (!questions) {
         throw new CustomErrors.NotFoundError('there is no questions')
