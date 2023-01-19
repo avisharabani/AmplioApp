@@ -10,6 +10,7 @@ const CustomErrors = require('../errors')
  */
 const getAllVotes = async (req, res) => {
     const votes = await Vote.find({})
+    
 
     if (!votes) {
         throw new CustomErrors.NotFoundError('there is no votes')
@@ -53,42 +54,44 @@ const createVote = async (req, res) => {
         req.body.userIp = userIp;
     }
 
-    const currentChoice = await Choice.findOne({ choiceId: choiceId });
-    const oldVote = await Choice.aggregate(
-        [{
-            $match: {
-                questionId: require('mongoose').Types.ObjectId(String(currentChoice.questionId))
-            }
-        }, {
-            $lookup: {
-                from: 'votes',
-                localField: '_id',
-                foreignField: 'choiceId',
-                pipeline: [
-                    { $match: { userIp: userIp } }
-                ],
-                as: 'oldVotes'
-            }
-        }, {
-            $unwind: {
-                path: '$oldVotes',
-                preserveNullAndEmptyArrays: false
-            }
-        }, {
-            $project: {
-                contact: 1,
-                oldVotes: 1
-            }
-        }]
-    );
+    const currentChoice = await Choice.findOne({ _id: choiceId });
+    req.body.questionId = currentChoice.questionId;
 
-    console.log(oldVote.length)
+    // const oldVote = await Choice.aggregate(
+    //     [{
+    //         $match: {
+    //             questionId: require('mongoose').Types.ObjectId(String(currentChoice.questionId))
+    //         }
+    //     }, {
+    //         $lookup: {
+    //             from: 'votes',
+    //             localField: '_id',
+    //             foreignField: 'choiceId',
+    //             pipeline: [
+    //                 { $match: { userIp: userIp } }
+    //             ],
+    //             as: 'oldVotes'
+    //         }
+    //     }, {
+    //         $unwind: {
+    //             path: '$oldVotes',
+    //             preserveNullAndEmptyArrays: false
+    //         }
+    //     }, {
+    //         $project: {
+    //             contact: 1,
+    //             oldVotes: 1
+    //         }
+    //     }]
+    // );
 
-    //if there is another choice by current user ip
-    if (oldVote.length > 0) {
-        const vote = await Vote.findOne({ _id: oldVote[0].oldVotes._id });
-        await vote.remove();
-    }
+    // console.log(oldVote.length)
+
+    // //if there is another choice by current user ip
+    // if (oldVote.length > 0) {
+    //     const vote = await Vote.findOne({ _id: oldVote[0].oldVotes._id });
+    //     await vote.remove();
+    // }
 
     const vote = await Vote.create(req.body);
 

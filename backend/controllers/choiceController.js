@@ -8,7 +8,7 @@ const CustomErrors = require('../errors')
  * @response array of choices 
  */
 const getAllChoices = async (req, res) => {
-    const choices = await Choice.find({})
+    const choices = await Choice.find({}).populate('votes')
 
     if (!choices) {
         throw new CustomErrors.NotFoundError('there is no choices')
@@ -54,6 +54,33 @@ const createChoice = async (req, res) => {
 
 };
 
+const createChoices = async (req, res) => {
+    const { choicesCollection } = req.body;
+    console.log(choicesCollection);
+
+    if (!choicesCollection) {
+        throw new CustomErrors.BadRequestError('please provide choicesCollection of[ {questionId, contentText} ]');
+    }
+    
+    choicesCollection.forEach(element => {
+            const { questionId, contentText } = element;
+            if (!questionId || !contentText) {
+                throw new CustomErrors.BadRequestError('please provide question id and content text');
+            }
+        })
+        
+    const choicesDocuments = await Choice.create(choicesCollection);
+    var choices = choicesDocuments.map((model) => { return model.toObject(); })
+
+    choices.forEach((choice) => {
+        choice.votes = [];
+    })
+
+    res.status(StatusCodes.CREATED).json({ choices });
+
+};
+
+
 /**
  * this is a DELETE method function that delete choice by specific id
  * @route /api/v1/choices/:id
@@ -77,6 +104,7 @@ const deleteChoice = async (req, res) => {
 
 module.exports = {
     createChoice,
+    createChoices,
     getSingleChoice,
     getAllChoices,
     deleteChoice,

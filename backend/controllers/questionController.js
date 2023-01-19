@@ -1,4 +1,5 @@
 const Question = require('../models/Question')
+const Vote = require('../models/Vote')
 const { StatusCodes } = require('http-status-codes')
 const CustomErrors = require('../errors')
 
@@ -8,12 +9,37 @@ const CustomErrors = require('../errors')
  * @response array of questions 
  */
 const getAllQuestions = async (req, res) => {
-    const questions = await Question.find({}).populate('choices')
+    const ip = req.ip;
+    const questionsDocuments = await Question.find({}).populate('choices').populate('votes')
+
+    var questions = questionsDocuments.map((model) => { return model.toObject(); })
+    const userVotes = await Vote.find({ userIp: ip })
+    console.log(userVotes);
+
+    userVotes.forEach(vote => {
+        const question = questions.find(question => {
+            console.log('question id: ' + question.id + "===" + vote.questionId);
+            return question.id.toString() === vote.questionId.toString()
+        })
+
+        if (question) {
+            question.selectedChoice = {choiceId: vote.choiceId,voteId: vote.id};
+            
+            console.log('question found');
+            console.log(question);
+
+        } else {
+            console.log(`question not found`);
+        }
+    })
+
 
     if (!questions) {
         throw new CustomErrors.NotFoundError('there is no questions')
     }
-    res.status(StatusCodes.OK).json({ count: questions.length, questions });
+    console.log('all questions');
+    console.log(questions);
+    res.status(StatusCodes.OK).json({ count: questions.length, questions, userIp: ip });
 };
 
 /**
@@ -26,11 +52,29 @@ const getSingleQuestion = async (req, res) => {
     if (!id) {
         throw new CustomErrors.BadRequestError('please provide an id');
     }
-    const question = await Question.findOne({ _id: id })
-        .populate('choices')
+    //const question = await Question.findOne({ _id: id }).populate('choices').populate('votes');
+
+    const ip = req.ip;
+    const questionDocument = await Question.findOne({ _id: id }).populate('choices').populate('votes');
+
+    var question = questionDocument.toObject();
+    const userVotes = await Vote.find({ userIp: ip })
+    console.log(userVotes);
+
+    userVotes.forEach(vote => {
+            console.log('question id: ' + question.id + "===" + vote.questionId);
+            if(question.id.toString() === vote.questionId.toString()){
+                console.log('question vote found');
+                question.selectedChoice = { choiceId: vote.choiceId, voteId: vote.id };
+                console.log(question);
+            } else {
+                console.log(`question vote not found`);
+            }
+    })
+
 
     if (!question) {
-        throw new CustomError.NotFoundError(`No question with id : ${req.params.id}`);
+        throw new CustomErrors.NotFoundError(`No question with id : ${req.params.id}`);
     }
     res.status(StatusCodes.OK).json({ question });
 };

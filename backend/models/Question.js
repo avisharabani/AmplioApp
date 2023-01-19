@@ -32,8 +32,16 @@ QuestionSchema.virtual('choices', {
   justOne: false,        
 });
 
+QuestionSchema.virtual('votes', {
+  ref: 'Vote',
+  localField: '_id',
+  foreignField: 'questionId',
+  justOne: false,
+});
+
+
 QuestionSchema.post('remove', async function () {
-  await this.model('Choice').deleteMany({ question: this._id });
+  await this.model('Choice').deleteMany({ questionId: this._id });
 });
 
 module.exports = mongoose.model('Question', QuestionSchema);

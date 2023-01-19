@@ -10,10 +10,15 @@ const VoteSchema = new mongoose.Schema({
         ref: 'Choice',
         required: true,
     },
+    questionId: {
+        type: mongoose.Types.ObjectId,
+        ref: 'Question',
+        required: true,
+    },
 
 }, { timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } }
 );
-VoteSchema.index({ userIp: "text", choiceId: 1 }, { unique: true });
+VoteSchema.index({ userIp: "text", choiceId:1 }, { unique: true });
 
 VoteSchema.statics.calculateRating = async function (id) {
     const result = await this.aggregate([

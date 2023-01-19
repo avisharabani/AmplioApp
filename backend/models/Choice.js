@@ -10,7 +10,7 @@ const ChoiceSchema = mongoose.Schema(
         contentText: {
             type: String,
             required: [true, 'Please provide choice text'],
-            minlength: [5, 'choice can not be less than 5 characters'],
+            minlength: [2, 'choice can not be less than 2 characters'],
             maxlength: [10000, 'choice can not be more than 500 characters'],
         },
         numOfVotes: {
@@ -58,7 +58,7 @@ ChoiceSchema.post('save', async function () {
 
 ChoiceSchema.post('remove', async function () {
     await this.constructor.calculateChoices(this.questionId);
-    await this.model('Vote').deleteMany({ choice: this._id });
+    await this.model('Vote').deleteMany({ choiceId: this._id });
 });
 
 

@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const {
     createChoice,
+    createChoices,
     getSingleChoice,
     getAllChoices,
     deleteChoice,
@@ -9,7 +10,9 @@ const {
 
 router.route('/')
     .get(getAllChoices)
-    .post(createChoice);
+    .post(createChoice); 
+router.route('/many')
+    .post(createChoices); 
 
 router.route('/:id')
     .get(getSingleChoice)
